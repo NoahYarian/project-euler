@@ -1762,4 +1762,419 @@ function add(numStr1, numStr2) {
 
 // Find the sum of all the numbers that can be written as the sum of fifth powers of their digits.
 
+function fif(num) {
+  var numStr = num.toString();
+  var sum = 0;
 
+  for (var i = 0; i < numStr.length; i++) {
+    sum += Math.pow(+numStr[i], 5);
+  }
+
+  return sum === num ? true : false;
+}
+
+var nums = [];
+for (var i = 10; i < 350000; i++) {
+  if (fif(i)) {
+    nums.push(i);
+  }
+}
+console.log(nums);
+
+//////////////////////////////
+
+// Coin sums
+// Problem 31
+// In England the currency is made up of pound, £, and pence, p, and there are eight coins in general circulation:
+
+// 1p, 2p, 5p, 10p, 20p, 50p, £1 (100p) and £2 (200p).
+// It is possible to make £2 in the following way:
+
+// 1×£1 + 1×50p + 2×20p + 1×5p + 1×2p + 3×1p
+// How many different ways can £2 be made using any number of coins?
+
+function coinSums() {
+  var ways = 0;
+
+  for (var a = 0; a <= 1; a++) { // 200p
+    for (var b = 0; b <= 2; b++) { // 100p
+      for (var c = 0; c <= 4; c++) { // 50p
+        for (var d = 0; d <= 10; d++) { // 20p
+          for (var e = 0; e <= 20; e++) { // 10p
+            for (var f = 0; f <= 40; f++) { // 5p
+              for (var g = 0; g <= 100; g++) { // 2p
+                for (var h = 0; h <= 200; h++) { // 1p
+                  if ( 200*a + 100*b + 50*c + 20*d + 10*e + 5*f + 2*g + h === 200 ) {
+                    ways++;
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  return ways;
+}
+
+
+//////////////////////
+
+// Pandigital products
+// Problem 32
+// We shall say that an n-digit number is pandigital if it makes use of all the digits 1 to n exactly once; for example,
+// the 5-digit number, 15234, is 1 through 5 pandigital.
+
+// The product 7254 is unusual, as the identity, 39 × 186 = 7254, containing multiplicand, multiplier, and product is 1
+// through 9 pandigital.
+
+// Find the sum of all products whose multiplicand/multiplier/product identity can be written as a 1 through 9 pandigital.
+
+// HINT: Some products can be obtained in more than one way so be sure to only include it once in your sum.
+
+// 97 x 86 = 8342  X
+// 15 x 234 = 3510
+// 95 x 876 = 83220
+
+// 156 x 234 = 36504  X
+
+// 1 1 7
+// 1 2 6
+// 1 3 5
+// 1 4 4  OK
+// 1 5 3
+// 1 6 2
+// 1 7 1
+// 2 2 5
+// 2 3 4  OK
+// 2 4 3
+// 2 5 2
+// 2 6 1
+// 3 3 3
+// 3 4 2
+// 3 5 1
+// 4 4 1
+
+
+function pandigitalProds() {
+  var str, num1, num2, prod, prodStr, num1B, num2B, prodB, prodStrB;
+  var prods = [];
+
+  for (var a = 1; a <= 9; a++) {
+    for (var b = 1; b <= 9; b++) {
+      for (var c = 1; c <= 9; c++) {
+        for (var d = 1; d <= 9; d++) {
+          for (var e = 1; e <= 9; e++) {
+            str = [a,b,c,d,e].join('');
+
+            if (!hasDupeDigit(str)) {
+              num1 = +[a,b].join('');
+              num2 = +[c,d,e].join('');
+              prod = num1 * num2;
+              prodStr = prod.toString();
+              if (
+                !hasDupeDigit(prodStr) &&
+                prodStr.indexOf('0') === -1 &&
+                prodStr.indexOf(a.toString()) === -1 &&
+                prodStr.indexOf(b.toString()) === -1 &&
+                prodStr.indexOf(c.toString()) === -1 &&
+                prodStr.indexOf(d.toString()) === -1 &&
+                prodStr.indexOf(e.toString()) === -1 &&
+                prods.indexOf(prod) === -1
+              ) {
+                prods.push(prod);
+              }
+              num1B = a;
+              num2B = +[b,c,d,e].join('');
+              prodB = num1B * num2B;
+              prodBStr = prodB.toString();
+              if (
+                !hasDupeDigit(prodBStr) &&
+                prodBStr.indexOf('0') === -1 &&
+                prodBStr.indexOf(a.toString()) === -1 &&
+                prodBStr.indexOf(b.toString()) === -1 &&
+                prodBStr.indexOf(c.toString()) === -1 &&
+                prodBStr.indexOf(d.toString()) === -1 &&
+                prodBStr.indexOf(e.toString()) === -1 &&
+                prods.indexOf(prodB) === -1
+              ) {
+                prods.push(prodB);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  console.log(prods);
+  return prods.reduce(function(p,c) {
+    return p+c;
+  }, 0);
+}
+
+function hasDupeDigit(str) {
+  for (var i = 0; i < str.length; i++) {
+    for (var j = 0; j < str.length; j++) {
+      if (i !== j && str[i] === str[j]) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+//////////////////////
+
+// Digit cancelling fractions
+// Problem 33
+// The fraction 49/98 is a curious fraction, as an inexperienced mathematician in attempting to simplify it may incorrectly
+// believe that 49/98 = 4/8, which is correct, is obtained by cancelling the 9s.
+
+// We shall consider fractions like, 30/50 = 3/5, to be trivial examples.
+
+// There are exactly four non-trivial examples of this type of fraction, less than one in value, and containing two digits
+// in the numerator and denominator.
+
+// If the product of these four fractions is given in its lowest common terms, find the value of the denominator.
+
+function curiousFracs () {
+  var shared, iArr, jArr, i2, j2;
+  var fracs = [];
+  for (var j = 10; j < 100; j++) { // j = 98
+    for (var i = 10; i < j; i++) { // i = 49
+      shared = shareDigit(i, j); // ['9']
+      console.log(shared);
+      if (shared && !(i % 10 === 0 && j % 10 === 0)) { // could just check for a zero in either number.. || vs &&
+        iArr = i.toString().split(''); // ['4', '9']
+        jArr = j.toString().split(''); // ['9', '8']
+        if (shared.length === 1) {
+          console.log(`${i} and ${j} have one shared digit: ${shared[0]}`);
+          iArr.splice(iArr.indexOf(shared[0]), 1);
+          jArr.splice(jArr.indexOf(shared[0]), 1);
+          if (equalish(i / j, iArr / jArr)) {
+            fracs.push({i: i, j: j});
+          }
+        } else {
+          iArr.splice(iArr.indexOf(shared[0]), 1);
+          jArr.splice(jArr.indexOf(shared[0]), 1);
+          if (equalish(i / j, iArr / jArr)) {
+            fracs.push({i: i, j: j});
+          }
+          iArr.splice(iArr.indexOf(shared[1]), 1);
+          jArr.splice(jArr.indexOf(shared[1]), 1);
+          if (equalish(i / j, iArr / jArr)) {
+            fracs.push({i: i, j: j});
+          }
+        }
+      }
+    }
+  }
+  return fracs;
+}
+
+
+function shareDigit (num1, num2) {
+  var str1 = num1.toString();
+  var str2 = num2.toString();
+  var shared = [];
+  for (var i = 0; i < str1.length; i++) {
+    for (var j = 0; j < str2.length; j++) {
+      if (i !== j && str1[i] === str2[j]) {
+        shared.push(str1[i]);
+      }
+    }
+  }
+  return shared.length > 0 ? shared : false;
+}
+
+function equalish (num1, num2) { // could add precision level
+  if (num1 === num2) {
+    return true;
+  } else if (num1 > num2 && num1 - .00001 < num2) {
+    return true;
+  } else if (num2 > num1 && num2 - .00001 < num1) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+// 1/4, 2/5, 1/5, 1/2....
+////////////////////////
+
+// Digit factorials
+// Problem 34
+// 145 is a curious number, as 1! + 4! + 5! = 1 + 24 + 120 = 145.
+
+// Find the sum of all numbers which are equal to the sum of the factorial of their digits.
+
+// Note: as 1! = 1 and 2! = 2 are not sums they are not included.
+
+// 9! * 7 = 2540160
+
+function digitFacts () {
+  var smallFacs = [];
+  var digitFacs = [];
+  var numStr, numFacSum;
+
+  for (var i = 0; i < 10; i++) {
+    smallFacs.push(getFacSimple(i));
+  }
+  console.log(smallFacs);
+
+  for (var j = 10; j < 2540160; j++) {
+    numStr = j.toString();
+    numFacSum = 0;
+    for (var k = 0; k < numStr.length; k++) {
+      numFacSum += smallFacs[numStr[k]];
+    }
+    if (j === numFacSum) {
+      digitFacs.push(j);
+    }
+  }
+  return digitFacs;
+}
+
+
+
+function getFacSimple(num) {
+  while (num > 1) {
+    return num * getFacSimple(num-1);
+  }
+  return num;
+}
+
+
+// ???? I am just getting 145 but apparently that's wrong.
+///////////////////////////////////
+
+// Circular primes
+// Problem 35
+// The number, 197, is called a circular prime because all rotations of the digits: 197, 971, and 719, are themselves prime.
+
+// There are thirteen such primes below 100: 2, 3, 5, 7, 11, 13, 17, 31, 37, 71, 73, 79, and 97.
+
+// How many circular primes are there below one million?
+
+
+// 2 -> 999,999    6! (720) ways to order a 6-digit number. 6^6 (46,656) if repeating. Less if there are zeros.
+// 120 ways for 5 digit, 24 ways for 4 digit, 6 ways for 3 digit, 2 ways for 2 digits, 1 way for 1 digit.
+
+// get primes < 1,000,000 -> 78,498
+// for each prime,
+
+
+// The following algorithm generates the next permutation lexicographically after a given permutation.
+// It changes the given permutation in-place.
+
+// Find the largest index k such that a[k] < a[k + 1]. If no such index exists, the permutation is the last permutation.
+// Find the largest index l greater than k such that a[k] < a[l].
+// Swap the value of a[k] with that of a[l].
+// Reverse the sequence from a[k + 1] up to and including the final element a[n].
+
+function permute (str, test, cache) {
+  var a = str.split('');
+  var swap, rev;
+
+  if (!cache) {
+    str = a.sort(function(a,b) {
+      return a - b;
+    }).join('');
+    cache = [str];
+  }
+
+  if (!test(str)) {
+    return false;
+  }
+
+  for (var k = a.length-1; k >= 0; k--) {
+    if (a[k] < a[k+1]) {
+      for (var l = a.length-1; l > k; l--) {
+        if (a[k] < a[l]) {
+          swap = a[l];
+          a[l] = a[k];
+          a[k] = swap;
+          rev = a.slice(k+1).reverse().join('');
+          a.splice(k+1, a.length-1, rev);
+          cache.push(a.join(''));
+          return permute(a.join(''), test, cache)
+        }
+      }
+    }
+  }
+  return cache;
+}
+
+function permutedPrimesBelow (max) {
+  var permPrimes = [];
+  var primes = getPrimesLessThan(max);
+  for (var i = 0; i < primes.length; i++) {
+    if (permute(primes[i].toString(), isPrime)) {
+      permPrimes.push(primes[i]);
+    }
+  }
+  return permPrimes;
+}
+
+function circularPrimesBelow (max) {
+  var circPrimes = [];
+  var primes = getPrimesLessThan(max);
+  for (var i = 0; i < primes.length; i++) {
+    if (rotate(primes[i].toString(), isPrime)) {
+      circPrimes.push(primes[i]);
+    }
+  }
+  return circPrimes;
+}
+
+function rotate (str, test, cache) {
+  var a = str.split('');
+
+  cache = cache || [str];
+
+  if (!test(str)) {
+    return false;
+  }
+
+  a.unshift(a.pop());
+  str = a.join('');
+
+  if (cache.indexOf(str) === -1) {
+    cache.push(str);
+    return rotate(str, test, cache);
+  }
+  return cache;
+}
+
+
+
+
+function isPrime(num) {
+  // var count = 1;
+  var i = 2;
+  var currentMax = num;
+  while (i < currentMax) {
+
+    if (num % i === 0) {
+      // console.log(count);
+      return false;
+    } else {
+      currentMax = num / i;
+    }
+    i++;
+    // count++;
+  }
+  // console.log(count);
+  return true;
+}
+
+function getPrimesLessThan(num) {
+  var primes = [];
+  for (var i = 2; i < num; i++) {
+    if (isPrime(i)) {
+      primes.push(i);
+    }
+  }
+  return primes;
+}
