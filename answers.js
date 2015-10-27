@@ -814,6 +814,46 @@ for (var i = 0; i < 100000; i++) {
 
 
 
+function permute (str) {
+
+  var arr = str.split('');
+  var count = 1;
+  var swap, rev;
+
+  var final = arr.sort(function(a,b) {
+    return b - a;
+  }).join('');
+
+  arr.sort(function(a,b) {
+    return a - b;
+  });
+
+  perm: while (arr.join('') !== final) {
+
+    arr = arr.join('').split('');
+
+    for (var k = arr.length-1; k >= 0; k--) {
+      if (arr[k] < arr[k+1]) {
+        for (var l = arr.length-1; l > k; l--) {
+          if (arr[k] < arr[l]) {
+            swap = arr[l];
+            arr[l] = arr[k];
+            arr[k] = swap;
+            rev = arr.slice(k+1).reverse().join('');
+            arr.splice(k+1, arr.length-1, rev);
+            count++;
+            continue perm;
+          }
+        }
+      }
+    }
+
+  }
+  return count;
+}
+
+
+
 //////////////////////
 // Power digit sum
 // Problem 16
@@ -1394,6 +1434,121 @@ var str = '543210';
 // 345021, 345201, 342501, 324501, 234501....
 
 
+function getLexPermNum (str, num) {
+
+  var arr = str.split('');
+  var count = 0;
+  var swap, rev;
+
+  var final = arr.sort(function(a,b) {
+    return b - a;
+  }).join('');
+
+  arr.sort(function(a,b) {
+    return a - b;
+  });
+
+  perm: while (count < num) {
+
+    arr = arr.join('').split('');
+
+    for (var k = arr.length-1; k >= 0; k--) {
+      if (arr[k] < arr[k+1]) {
+        for (var l = arr.length-1; l > k; l--) {
+          if (arr[k] < arr[l]) {
+            swap = arr[l];
+            arr[l] = arr[k];
+            arr[k] = swap;
+            rev = arr.slice(k+1).reverse().join('');
+            arr.splice(k+1, arr.length-1, rev);
+            count++;
+            continue perm;
+          }
+        }
+      }
+    }
+
+  }
+  return arr.join('');
+}
+
+// Heap's algorithm
+
+// procedure generate(n : integer, A : array of any):
+//     if n = 1 then
+//           output(A)
+//     else
+//         for i := 0; i < n - 1; i += 1 do
+//             generate(n - 1, A)
+//             if n is even then
+//                 swap(A[i], A[n-1])
+//             else
+//                 swap(A[0], A[n-1])
+//             end if
+//         end for
+//         generate(n - 1, A)
+//     end if
+
+function heap (num) {
+
+  var arr = (num + '').split('');
+  var perms = [];
+
+  function swap (a, b) {
+    var temp = arr[a];
+    arr[a] = arr[b];
+    arr[b] = temp;
+  }
+
+  function generate(n) {
+    if (n === 1) {
+      perms.push(arr.join());
+    } else {
+      for (var i = 0; i < n; i++) {
+        generate(n - 1);
+        swap(n % 2 ? 0 : i, n-1);
+      }
+    }
+  }
+
+  generate(arr.length);
+  return perms;
+}
+
+
+
+function permute (str, test, cache) {
+  var a = str.split('');
+  var swap, rev;
+
+  if (!cache) {
+    str = a.sort(function(a,b) {
+      return a - b;
+    }).join('');
+    cache = [str];
+  }
+
+  if (!test(str)) {
+    return false;
+  }
+
+  for (var k = a.length-1; k >= 0; k--) {
+    if (a[k] < a[k+1]) {
+      for (var l = a.length-1; l > k; l--) {
+        if (a[k] < a[l]) {
+          swap = a[l];
+          a[l] = a[k];
+          a[k] = swap;
+          rev = a.slice(k+1).reverse().join('');
+          a.splice(k+1, a.length-1, rev);
+          cache.push(a.join(''));
+          return permute(a.join(''), test, cache)
+        }
+      }
+    }
+  }
+  return cache;
+}
 
 //////////////
 
@@ -2178,3 +2333,333 @@ function getPrimesLessThan(num) {
   }
   return primes;
 }
+
+///////////////////////////////
+
+// Double-base palindromes
+// Problem 36
+// The decimal number, 585 = 10010010012 (binary), is palindromic in both bases.
+
+// Find the sum of all numbers, less than one million, which are palindromic in base 10 and base 2.
+
+// (Please note that the palindromic number, in either base, may not include leading zeros.)
+
+
+function isPalindrome(str) {
+  return str === str.split('').reverse().join('') ? true : false;
+}
+
+function doublePalsBelow (max) {
+  var pals = [];
+  var palsB = [];
+
+  for (var i = 1; i < max; i++) {
+    if (isPalindrome(i.toString()) && isPalindrome(i.toString(2))) {
+      pals.push(i);
+      palsB.push(i.toString(2));
+    }
+  }
+  console.log(pals, palsB);
+  return pals.reduce(function(p,c) {
+    return +p + +c;
+  }, 0);
+}
+
+
+///////////////////////////////
+
+// Truncatable primes
+// Problem 37
+// The number 3797 has an interesting property. Being prime itself, it is possible to continuously remove
+// digits from left to right, and remain prime at each stage: 3797, 797, 97, and 7. Similarly we can work from
+// right to left: 3797, 379, 37, and 3.
+
+// Find the sum of the only eleven primes that are both truncatable from left to right and right to left.
+
+// NOTE: 2, 3, 5, and 7 are not considered to be truncatable primes.
+
+// while array.length < 11
+// for each prime
+// prime.popped -> prime? while length > 0
+// prime.shifted -> prime? while length > 0
+//// push to array
+
+function truncPrimes() {
+
+  var demPrimes = [];
+  var i = 11;
+  var arr;
+
+  findingPrimes: while (demPrimes.length < 11) {
+    if (isPrime(i)) {
+      arr = (i + '').split('');
+      while (arr.length > 0) {
+        arr.pop();
+        if (!isPrime(+arr.join(''))) {
+          i++;
+          continue findingPrimes;
+        }
+      }
+      arr = (i + '').split('');
+      while (arr.length > 0) {
+        arr.shift();
+        if (!isPrime(+arr.join(''))) {
+          i++;
+          continue findingPrimes;
+        }
+      }
+      demPrimes.push(i);
+    }
+    i++;
+  }
+
+  console.log(demPrimes);
+  return demPrimes.reduce(function(p,c) {
+    return p+c;
+  }, 0);
+
+}
+
+function isPrime(num) {
+  // var count = 1;
+  var i = 2;
+  var currentMax = num;
+  while (i < currentMax) {
+
+    if (num % i === 0) {
+      // console.log(count);
+      return false;
+    } else {
+      currentMax = num / i;
+    }
+    i++;
+    // count++;
+  }
+  // console.log(count);
+  return num === 1 ? false : true;
+}
+
+////////////////////////
+
+// Pandigital multiples
+// Problem 38
+// Take the number 192 and multiply it by each of 1, 2, and 3:
+
+// 192 × 1 = 192
+// 192 × 2 = 384
+// 192 × 3 = 576
+// By concatenating each product we get the 1 to 9 pandigital, 192384576. We will call 192384576 the concatenated product
+// of 192 and (1,2,3)
+
+// The same can be achieved by starting with 9 and multiplying by 1, 2, 3, 4, and 5, giving the pandigital, 918273645,
+// which is the concatenated product of 9 and (1,2,3,4,5).
+
+// What is the largest 1 to 9 pandigital 9-digit number that can be formed as the concatenated product of an integer
+// with (1,2, ... , n) where n > 1?
+
+         (?)
+9 . . . 1 8 . . .
+
+987654321
+987654312
+987654231
+987654213
+987654132
+987654123
+...
+
+
+98 196X
+97 194X
+96 192X
+95 190X
+94 188X
+93 186 279X
+92 184 276X
+91 182X
+
+987 1974X
+
+// greatest num possible for 9 digit number that is 1x something + 2x something:
+0000 00000
+9999 19998
+
+// smallest :
+5000 10000
+
+// so.. 9182 < n < 9999 *******************
+
+// greatest num possible for 9 digit number that is 1x something + 2x something + 3x something:
+000 000 000
+333 666 999
+
+// greatest num possible for 9 digit number that is 1x something + 2x something + 3x something + 4x something:
+00 00 00 000
+
+3*n < 100, 4*n >= 100
+n = 33
+
+33 66 99 198
+
+// greatest num possible for 9 digit number that is 1x something ... 5x something:
+0 00 00 00 00
+
+9 18 27 36 45
+
+// greatest num possible for 9 digit number that is 1x something ... 6x something:
+0 0 0 00 00 00
+3 6 9 12 15 18
+
+// greatest num possible for 9 digit number that is 1x something ... 7x something:
+0 0 0 0 0 00 00
+
+5*n < 10, 6*n >= 10
+no integer solution
+
+// greatest num possible for 9 digit number that is 1x something ... 8x something:
+0 0 0 0 0 0 0 00
+
+7*n < 10, 8*n >= 10
+no integer solution
+
+// greatest num possible for 9 digit number that is 1x something ... 9x something:
+0 0 0 0 0 0 0 0 0
+1 2 3 4 5 6 7 8 9
+
+
+function makePandigital (num, n) {
+  var str = '';
+  for (var i = 1; i <= n; i++) {
+    str += (i * num);
+  }
+  return +str;
+}
+
+
+
+// so.. 9182 < n < 9999 * (1, 2) *******************
+
+var max = 918273645;
+var nums = [];
+var str;
+
+function is1to9Pandigital (num) {
+  var arr = (num + '').split('');
+  var foundDigits = ['0'];
+  while (arr.length > 0) {
+    if (foundDigits.indexOf(arr[0]) === -1) {
+      foundDigits.push(arr.shift());
+    } else {
+      return false;
+    }
+  }
+  return true;
+}
+
+for (var i = 9182; i < 9999; i++) {
+  str = i + '';
+  str += i*2;
+  if (is1to9Pandigital(+str)) {
+    nums.push(i);
+    max = max < +str ? str : max;
+  }
+}
+
+console.log(nums, max);
+
+//////////////////////////////////////
+
+// Integer right triangles
+// Problem 39
+// If p is the perimeter of a right angle triangle with integral length sides, {a,b,c}, there are exactly three solutions for p = 120.
+
+// {20,48,52}, {24,45,51}, {30,40,50}
+
+// For which value of p ≤ 1000, is the number of solutions maximised?
+
+function findRightTris (perim) {
+  var c;
+  var tris = [];
+  for (var a = 1; a < perim/2; a++) {
+    for (var b = 1; b <= a; b++) {
+      c = Math.sqrt(a*a + b*b);
+      if (c % 1 === 0 && a + b + c === perim) {
+        tris.push([a,b,c]);
+      }
+    }
+  }
+  return tris;
+}
+
+var max = 0;
+var bestP = 12;
+var len;
+
+for (var p = 12; p <= 1000; p++) {
+
+  len = findRightTris(p).length;
+  if (len > max) {
+    max = len;
+    bestP = p;
+  }
+}
+
+console.log(bestP);
+
+/////////////////////////////////////
+
+// Champernowne's constant
+// Problem 40
+// An irrational decimal fraction is created by concatenating the positive integers:
+
+// 0.123456789101112131415161718192021...
+
+// It can be seen that the 12th digit of the fractional part is 1.
+
+// If dn represents the nth digit of the fractional part, find the value of the following expression.
+
+// d1 × d10 × d100 × d1000 × d10000 × d100000 × d1000000
+
+function makeChamp(num) {
+  var str = '';
+  for (var i = 1; i <= num; i++) {
+    str += i;
+  }
+  return str;
+}
+
+makeChamp(99).length = 189 = 1(9) + 2(99 - 9)
+makeChamp(999).length = 1(9) + 2(99 - 9) + 3(999 - 99) = 9 + 180 + 2700 = 2889
+
+function getChampDigit(digit) {
+  var totalLength = 0;
+  var numLength, prevNumLen, offset;
+  for (var num = 0; totalLength < digit; num++) {
+    numLength = ('' + num).length;
+    totalLength += numLength;
+  }
+  offset = totalLength - digit;
+  if (offset > 0) {
+    console.log(num-1, offset);
+  } else {
+    console.log(num, offset);
+  }
+
+  prevNumLen = ('' + (num-1)).length;
+  return offset > 0 ? ('' + (num-1))[prevNumLen - offset] : ('' + (num))[0];
+}
+
+total = 1;
+total *= getChampDigit(1);
+total *= getChampDigit(10);
+total *= getChampDigit(100);
+total *= getChampDigit(1000);
+total *= getChampDigit(10000);
+total *= getChampDigit(100000);
+total *= getChampDigit(1000000);
+console.log(total);
+console.log('boom!');
+
+
+
+////////////////////////////////
