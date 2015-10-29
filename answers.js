@@ -2663,3 +2663,289 @@ console.log('boom!');
 
 
 ////////////////////////////////
+
+// Pandigital prime
+// Problem 41
+// We shall say that an n-digit number is pandigital if it makes use of all the digits
+// 1 to n exactly once. For example, 2143 is a 4-digit pandigital and is also prime.
+
+// What is the largest n-digit pandigital prime that exists?
+
+function permuteRevUntilPrime (str) {
+  var arr = str.split('');
+  var swap, rev, ret;
+  var unfound = true;
+  var count = 0;
+  var first = [];
+
+  for (var i = 0; i < arr.length; i++) {
+    first[i] = arr[arr.length-1-i];
+  }
+
+  arr.sort(function(a,b) {  //high to low
+      return +b - +a;
+  });
+
+  while (unfound || count > 100) {
+    // console.log(arr, first)
+    if (arr.join('') === first.join('')) {
+      return false;
+    }
+    looking: for (var k = arr.length-1; k >= 0; k--) {
+      if (arr[k] > arr[k+1]) { // to make rev this was changed from < to >
+        for (var l = arr.length-1; l > k; l--) {
+          if (arr[k] > arr[l]) { // to make rev this was changed from < to >
+            swap = arr[l];
+            arr[l] = arr[k];
+            arr[k] = swap;
+            rev = arr.slice(k+1).reverse().join('');
+            arr.splice(k+1, arr.length-1, rev);
+            ret = arr.join('');
+            if (isPrime(+ret)) {
+              return +ret;
+            } else {
+              arr = ret.split('');
+              count++;
+              break looking;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+function isPrime(num) {
+  // var count = 1;
+  var i = 2;
+  var currentMax = num;
+  while (i < currentMax) {
+
+    if (num % i === 0) {
+      // console.log(count);
+      return false;
+    } else {
+      currentMax = num / i;
+    }
+    i++;
+    // count++;
+  }
+  // console.log(count);
+  return num === 1 ? false : true;
+}
+
+
+////////////////////
+
+// Coded triangle numbers
+// Problem 42
+// The nth term of the sequence of triangle numbers is given by, tn = ½n(n+1); so the first ten triangle numbers are:
+
+// 1, 3, 6, 10, 15, 21, 28, 36, 45, 55, ...
+
+// By converting each letter in a word to a number corresponding to its alphabetical position and adding these values
+// we form a word value. For example, the word value for SKY is 19 + 11 + 25 = 55 = t10. If the word value is a triangle
+// number then we shall call the word a triangle word.
+
+// Using words.txt (right click and 'Save Link/Target As...'), a 16K text file containing nearly two-thousand common English
+//  words, how many are triangle words?
+
+function getMaxLength(arr) {
+  var max = 0;
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i].length > max) {
+      max = arr[i].length;
+    }
+  }
+  return max;
+}
+// 14
+
+function wordToNum(word) {
+  var arr = word.split('');
+  var abc = '_abcdefghijklmnopqrstuvwxyz';
+  var sum = 0;
+  for (var i = 0; i < arr.length; i++) {
+    sum += abc.indexOf(arr[i].toLowerCase());
+  }
+  return sum;
+}
+
+function isTriNum(num, max) {
+  var triNums = [];
+  var tri = 0;
+  for (var i = 1; tri <= max; i++) {
+    tri = .5 * i * (i + 1);
+    triNums.push(tri);
+  }
+  if (triNums.indexOf(num) !== -1) {
+    return true;
+  }
+  return false;
+}
+
+function countTriWords(arr) {
+  var count = 0;
+  var max = getMaxLength(arr) * 26;
+  for (var i = 0; i < arr.length; i++) {
+    if (isTriNum(wordToNum(arr[i]), max)) {
+      count++;
+    }
+  }
+  return count;
+}
+
+
+/////////////////
+
+// Sub-string divisibility
+// Problem 43
+// The number, 1406357289, is a 0 to 9 pandigital number because it is made up of each of the digits 0 to 9 in some order,
+// but it also has a rather interesting sub-string divisibility property.
+
+// Let d1 be the 1st digit, d2 be the 2nd digit, and so on. In this way, we note the following:
+
+// d2d3d4=406 is divisible by 2
+// d3d4d5=063 is divisible by 3
+// d4d5d6=635 is divisible by 5
+// d5d6d7=357 is divisible by 7
+// d6d7d8=572 is divisible by 11
+// d7d8d9=728 is divisible by 13
+// d8d9d10=289 is divisible by 17
+// Find the sum of all 0 to 9 pandigital numbers with this property.
+
+
+function permuteStrAndSavePassing (str, test) {
+  var arr = str.split('');
+  var swap, rev, ret;
+  var count = 0;
+  var first = [];
+  var unfound = true;
+  var retArr = [];
+
+  arr.sort(function(a,b) {  //high to low
+      return +b - +a;
+  });
+
+  for (var i = 0; i < arr.length; i++) {  //low to high
+    first[i] = arr[arr.length-1-i];
+  }
+
+  while (unfound) {
+    if (count % 500 === 0) {
+      console.log(count);
+    }
+    if (arr.join('') === first.join('')) {
+      return retArr;
+    }
+    looking: for (var k = arr.length-1; k >= 0; k--) {
+      if (arr[k] > arr[k+1]) {
+        for (var l = arr.length-1; l > k; l--) {
+          if (arr[k] > arr[l]) {
+            swap = arr[l];
+            arr[l] = arr[k];
+            arr[k] = swap;
+            rev = arr.slice(k+1).reverse().join('');
+            arr.splice(k+1, arr.length-1, rev);
+            ret = arr.join('');
+            count++;
+            if (test(ret)) {
+              retArr.push(+ret);
+            } else {
+              arr = ret.split('');
+              break looking;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+function interesting(pandigital) {
+  var arr = pandigital.split('');
+  if (
+    +arr.slice(1, 4).join('') % 2 === 0 &&
+    +arr.slice(2, 5).join('') % 3 === 0 &&
+    +arr.slice(3, 6).join('') % 5 === 0 &&
+    +arr.slice(4, 7).join('') % 7 === 0 &&
+    +arr.slice(5, 8).join('') % 11 === 0 &&
+    +arr.slice(6, 9).join('') % 13 === 0 &&
+    +arr.slice(7).join('') % 17 === 0
+  ) {
+    return true;
+  }
+  return false;
+}
+
+permuteStrAndSavePassing('1406357289', interesting)
+
+
+///////////////////////////
+
+// Pentagon numbers
+// Problem 44
+// Pentagonal numbers are generated by the formula, Pn=n(3n−1)/2. The first ten pentagonal numbers are:
+
+// 1, 5, 12, 22, 35, 51, 70, 92, 117, 145, ...
+
+// It can be seen that P4 + P7 = 22 + 70 = 92 = P8. However, their difference, 70 − 22 = 48, is not pentagonal.
+
+// Find the pair of pentagonal numbers, Pj and Pk, for which their sum and difference are pentagonal
+// and D = |Pk − Pj| is minimised; what is the value of D?
+
+function pent(n) {
+  return n * ((3 * n) - 1) / 2;
+}
+
+function findNums(maxN) {
+  var pents = ['zero'];
+  var d, sum, diff;
+  for (var i = 1; i < 2 * maxN; i++) {
+    pents.push(pent(i));
+  }
+  for (var j = 2; j < maxN; j++) {
+    for (var k = 1; k < j; k++) {
+      // console.log(j, k);
+
+      sum = pents[j] + pents[k];
+      diff = pents[j] - pents[k];
+
+      if (pents.indexOf(sum) !== -1 &&
+          pents.indexOf(diff) !== -1 &&
+          (!d || pent(j) - pent(k) > d)
+      ) {
+        d = diff;
+        console.log(j, k, d)
+
+      // if (hasPentSumNDiff(pent(j), pent(k)) && (!d || pent(j) - pent(k) > d)) {
+        // d = pent(j) - pent(k);
+        // console.log(j, k);
+      }
+    }
+  }
+  return d;
+}
+
+function hasPentSumNDiff (num1, num2) {
+  console.log('nums: ' + num1 + ' ' + num2 + ' sum: ' + (num1 + num2) + ' diff: ' + (num1 - num2));
+  if (isPent(num1 + num2) && isPent(num1 - num2)) {
+    return true;
+  }
+  return false;
+}
+
+function isPent(num) {
+  var i = 1;
+  var disPent = 0;
+  while (disPent < num) {
+    disPent = pent(i);
+    i++;
+  }
+  return num === disPent ? true : false;
+}
+
+//////////////////////////
+
+
+
