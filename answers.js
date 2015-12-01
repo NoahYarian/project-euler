@@ -3135,6 +3135,1054 @@ function findIt() {
 
 // Find the first four consecutive integers to have four distinct prime factors. What is the first of these numbers?
 
+// 210 = 2 * 3 * 5 * 7
+
+var primes = [2];
+
+if (!Array.prototype.last){
+    Array.prototype.last = function(){
+        return this[this.length - 1];
+    };
+};
+
+function pushNextPrime() {
+  var currNum = primes[primes.length-1] + 1;
+
+  while (!isPrime(currNum)) {
+    currNum++;
+  }
+
+  primes.push(currNum);
+}
+
+function isPrime(num) {
+  // var count = 1;
+  var i = 2;
+  var currentMax = num;
+  while (i < currentMax) {
+
+    if (num % i === 0) {
+      // console.log(count);
+      return false;
+    } else {
+      currentMax = num / i;
+    }
+    i++;
+    // count++;
+  }
+  // console.log(count);
+  return num === 1 ? false : true;
+}
+
+function primeFactorize (num, factors) {
+  var factorsArr = factors || [];
+
+  if (num === 1) {
+    return factors;
+  }
+
+  while (num > primes.last()) {
+    pushNextPrime();
+  }
+
+  for (var i = 0; primes[i] <= num; i++) {
+    if (num % primes[i] === 0) {
+      factorsArr.push(primes[i]);
+      return primeFactorize(num / primes[i], factorsArr);
+    }
+  }
+}
+
+function countUniqueArrItems (arr) {
+  var uniques = [];
+  for (var i = 0; i < arr.length; i++) {
+    if (uniques.indexOf(arr[i]) === -1) {
+      uniques.push(arr[i]);
+    }
+  }
+  return uniques.length;
+}
+
+function findEm() {
+  var i = 210;
+
+  while (true) {
+    if (countUniqueArrItems(primeFactorize(i)) === 4
+      && countUniqueArrItems(primeFactorize(i+1)) === 4
+      && countUniqueArrItems(primeFactorize(i+2)) === 4
+      && countUniqueArrItems(primeFactorize(i+3)) === 4) {
+      return i;
+    } else {
+      i++;
+    }
+  }
+}
+
+/////////////////////
+// Self powers
+// Problem 48
+// The series, 1^1 + 2^2 + 3^3 + ... + 10^10 = 10405071317.
+
+// Find the last ten digits of the series, 1^1 + 2^2 + 3^3 + ... + 1000^1000.
+
+function selfPow (num) {
+  var result = num.toString();
+  for (var i = 0; i < num-1; i++) {
+    result = multiply(result, num);
+  }
+  return result;
+}
+
+function multiply(numStr1, num2) {
+
+  var digitMultd;
+  var carry = 0;
+  var prodArr = [];
+  var numsToSum = [];
+  var num, numArr;
+  for (var i = numStr1.length-1; i >= 0; i--) {
+    num = (numStr1[i] * num2).toString();
+    numArr = num.split('');
+    for (var j = 0; j < numStr1.length-1-i; j++) {
+      numArr.push('0');
+    }
+    num = numArr.join('');
+    numsToSum.push(num);
+  }
+  // console.log(numsToSum);
+  return numsToSum.reduce(function(prev, curr) {
+    return add(prev, curr);
+  }, '0');
+
+}
+
+function add(numStr1, numStr2) {
+  var numArr1 = numStr1.split('');
+  var numArr2 = numStr2.split('');
+  var lengthDiff = numArr1.length > numArr2.length ? numArr1.length - numArr2.length : numArr2.length - numArr1.length;
+  // console.log('lengthDiff: ', lengthDiff);
+  var sumArr = [];
+  var summedNum;
+  var carry = 0;
 
 
+  for (var j = 0; j < lengthDiff; j++) {
+    if (numArr1.length > numArr2.length) {
+      numArr2.unshift("0");
+    } else {
+      numArr1.unshift("0");
+    }
+  }
 
+  for (var i = numArr1.length-1; i >= 0; i--) {
+    summedNumStr = (+numArr1[i] + +numArr2[i] + carry).toString();
+    if (summedNumStr.length > 1 && i !== 0) {
+      sumArr.unshift(summedNumStr[1]);
+      carry = +summedNumStr[0];
+    } else {
+      sumArr.unshift(summedNumStr);
+      carry = 0;
+    }
+  }
+  // console.log(sumArr);
+  return sumArr.join('');
+}
+
+function addSelfPows1to(max) { // some say he's still waiting to this day...
+  var start = new Date();
+  result = "1";
+  for (var i = 2; i <= max; i++) {
+    result = add(result, selfPow(i))
+  }
+  console.log(result.length);
+  var finish = new Date();
+  console.log("Took " + (finish - start) / 1000 + " seconds.");
+  return result.split('').slice(-10).join('');
+}
+
+function getTimeEstimationData(func, min, max, testMax, increment) {
+  var xAxis = [];
+  var yAxis = [];
+  var coords = [];
+
+  for (var i = min; i <= testMax; i += increment) {
+    xAxis.push(i);
+    var start = new Date();
+    func(i);
+    var finish = new Date();
+    var elapsed = finish - start;
+    yAxis.push(elapsed);
+  }
+  for (var j = 0; j < xAxis.length; j++) {
+    coords.push(xAxis[j] + " " + yAxis[j]);
+  }
+  // console.log("xAxis: " + xAxis);
+  // console.log("yAxis: " + yAxis);
+  console.log(coords.join('\n'));
+}
+
+function getSelfPowsArr1To(max) {
+  var arr = ['0'];
+  for (var i = 1; i <= max; i++) {
+    arr.push(selfPow(i));
+  }
+  return arr;
+}
+
+function addLastDigitsOfSelfPows1To(max) {
+  var start = new Date();
+  var arr = getSelfPowsArr1To(max);
+  var result = '0';
+  for (var i = 0; i < arr.length; i++) {
+    if (arr[i].length > 15) {
+      arr[i] = arr[i].split('').slice(-15).join('');
+    }
+    result = add(result, arr[i]);
+  }
+  var finish = new Date();
+  console.log("Took " + (finish - start) / 1000 + " seconds.");
+  return result;
+}
+
+function time(func) { //doesn't work
+  var start = new Date();
+  var x = func();
+  var finish = new Date();
+  var elapsed = finish - start;
+  return elapsed + "ms";
+}
+
+//72.40885464816855 years to calculate, apparently.
+
+///////////////////////
+// Prime permutations
+// Problem 49
+// The arithmetic sequence, 1487, 4817, 8147, in which each of the terms increases by 3330, is unusual in two ways: (i) each of the three terms are prime, and, (ii) each of the 4-digit numbers are permutations of one another.
+
+// There are no arithmetic sequences made up of three 1-, 2-, or 3-digit primes, exhibiting this property, but there is one other 4-digit increasing sequence.
+
+// What 12-digit number do you form by concatenating the three terms in this sequence?
+
+function isPrime(num) {
+  // var count = 1;
+  var i = 2;
+  var currentMax = num;
+  while (i < currentMax) {
+
+    if (num % i === 0) {
+      // console.log(count);
+      return false;
+    } else {
+      currentMax = num / i;
+    }
+    i++;
+    // count++;
+  }
+  // console.log(count);
+  return true;
+}
+
+function getPrimesLessThan(num) {
+  var primes = [];
+  for (var i = 2; i < num; i++) {
+    if (isPrime(i)) {
+      primes.push(i);
+    }
+  }
+  return primes;
+}
+
+var dozPrimes = [1009,1013,1019,1021,1031,1033,1039,1049,1051,1061,1063,1069,1087,1091,1093,1097,1103,1109,1117,1123,1129,1151,1153,1163,1171,1181,1187,1193,1201,1213,1217,1223,1229,1231,1237,1249,1259,1277,1279,1283,1289,1291,1297,1301,1303,1307,1319,1321,1327,1361,1367,1373,1381,1399,1409,1423,1427,1429,1433,1439,1447,1451,1453,1459,1471,1481,1483,1487,1489,1493,1499,1511,1523,1531,1543,1549,1553,1559,1567,1571,1579,1583,1597,1601,1607,1609,1613,1619,1621,1627,1637,1657,1663,1667,1669,1693,1697,1699,1709,1721,1723,1733,1741,1747,1753,1759,1777,1783,1787,1789,1801,1811,1823,1831,1847,1861,1867,1871,1873,1877,1879,1889,1901,1907,1913,1931,1933,1949,1951,1973,1979,1987,1993,1997,1999,2003,2011,2017,2027,2029,2039,2053,2063,2069,2081,2083,2087,2089,2099,2111,2113,2129,2131,2137,2141,2143,2153,2161,2179,2203,2207,2213,2221,2237,2239,2243,2251,2267,2269,2273,2281,2287,2293,2297,2309,2311,2333,2339,2341,2347,2351,2357,2371,2377,2381,2383,2389,2393,2399,2411,2417,2423,2437,2441,2447,2459,2467,2473,2477,2503,2521,2531,2539,2543,2549,2551,2557,2579,2591,2593,2609,2617,2621,2633,2647,2657,2659,2663,2671,2677,2683,2687,2689,2693,2699,2707,2711,2713,2719,2729,2731,2741,2749,2753,2767,2777,2789,2791,2797,2801,2803,2819,2833,2837,2843,2851,2857,2861,2879,2887,2897,2903,2909,2917,2927,2939,2953,2957,2963,2969,2971,2999,3001,3011,3019,3023,3037,3041,3049,3061,3067,3079,3083,3089,3109,3119,3121,3137,3163,3167,3169,3181,3187,3191,3203,3209,3217,3221,3229,3251,3253,3257,3259,3271,3299,3301,3307,3313,3319,3323,3329,3331,3343,3347,3359,3361,3371,3373,3389,3391,3407,3413,3433,3449,3457,3461,3463,3467,3469,3491,3499,3511,3517,3527,3529,3533,3539,3541,3547,3557,3559,3571,3581,3583,3593,3607,3613,3617,3623,3631,3637,3643,3659,3671,3673,3677,3691,3697,3701,3709,3719,3727,3733,3739,3761,3767,3769,3779,3793,3797,3803,3821,3823,3833,3847,3851,3853,3863,3877,3881,3889,3907,3911,3917,3919,3923,3929,3931,3943,3947,3967,3989,4001,4003,4007,4013,4019,4021,4027,4049,4051,4057,4073,4079,4091,4093,4099,4111,4127,4129,4133,4139,4153,4157,4159,4177,4201,4211,4217,4219,4229,4231,4241,4243,4253,4259,4261,4271,4273,4283,4289,4297,4327,4337,4339,4349,4357,4363,4373,4391,4397,4409,4421,4423,4441,4447,4451,4457,4463,4481,4483,4493,4507,4513,4517,4519,4523,4547,4549,4561,4567,4583,4591,4597,4603,4621,4637,4639,4643,4649,4651,4657,4663,4673,4679,4691,4703,4721,4723,4729,4733,4751,4759,4783,4787,4789,4793,4799,4801,4813,4817,4831,4861,4871,4877,4889,4903,4909,4919,4931,4933,4937,4943,4951,4957,4967,4969,4973,4987,4993,4999,5003,5009,5011,5021,5023,5039,5051,5059,5077,5081,5087,5099,5101,5107,5113,5119,5147,5153,5167,5171,5179,5189,5197,5209,5227,5231,5233,5237,5261,5273,5279,5281,5297,5303,5309,5323,5333,5347,5351,5381,5387,5393,5399,5407,5413,5417,5419,5431,5437,5441,5443,5449,5471,5477,5479,5483,5501,5503,5507,5519,5521,5527,5531,5557,5563,5569,5573,5581,5591,5623,5639,5641,5647,5651,5653,5657,5659,5669,5683,5689,5693,5701,5711,5717,5737,5741,5743,5749,5779,5783,5791,5801,5807,5813,5821,5827,5839,5843,5849,5851,5857,5861,5867,5869,5879,5881,5897,5903,5923,5927,5939,5953,5981,5987,6007,6011,6029,6037,6043,6047,6053,6067,6073,6079,6089,6091,6101,6113,6121,6131,6133,6143,6151,6163,6173,6197,6199,6203,6211,6217,6221,6229,6247,6257,6263,6269,6271,6277,6287,6299,6301,6311,6317,6323,6329,6337,6343,6353,6359,6361,6367,6373,6379,6389,6397,6421,6427,6449,6451,6469,6473,6481,6491,6521,6529,6547,6551,6553,6563,6569,6571,6577,6581,6599,6607,6619,6637,6653,6659,6661,6673,6679,6689,6691,6701,6703,6709,6719,6733,6737,6761,6763,6779,6781,6791,6793,6803,6823,6827,6829,6833,6841,6857,6863,6869,6871,6883,6899,6907,6911,6917,6947,6949,6959,6961,6967,6971,6977,6983,6991,6997,7001,7013,7019,7027,7039,7043,7057,7069,7079,7103,7109,7121,7127,7129,7151,7159,7177,7187,7193,7207,7211,7213,7219,7229,7237,7243,7247,7253,7283,7297,7307,7309,7321,7331,7333,7349,7351,7369,7393,7411,7417,7433,7451,7457,7459,7477,7481,7487,7489,7499,7507,7517,7523,7529,7537,7541,7547,7549,7559,7561,7573,7577,7583,7589,7591,7603,7607,7621,7639,7643,7649,7669,7673,7681,7687,7691,7699,7703,7717,7723,7727,7741,7753,7757,7759,7789,7793,7817,7823,7829,7841,7853,7867,7873,7877,7879,7883,7901,7907,7919,7927,7933,7937,7949,7951,7963,7993,8009,8011,8017,8039,8053,8059,8069,8081,8087,8089,8093,8101,8111,8117,8123,8147,8161,8167,8171,8179,8191,8209,8219,8221,8231,8233,8237,8243,8263,8269,8273,8287,8291,8293,8297,8311,8317,8329,8353,8363,8369,8377,8387,8389,8419,8423,8429,8431,8443,8447,8461,8467,8501,8513,8521,8527,8537,8539,8543,8563,8573,8581,8597,8599,8609,8623,8627,8629,8641,8647,8663,8669,8677,8681,8689,8693,8699,8707,8713,8719,8731,8737,8741,8747,8753,8761,8779,8783,8803,8807,8819,8821,8831,8837,8839,8849,8861,8863,8867,8887,8893,8923,8929,8933,8941,8951,8963,8969,8971,8999,9001,9007,9011,9013,9029,9041,9043,9049,9059,9067,9091,9103,9109,9127,9133,9137,9151,9157,9161,9173,9181,9187,9199,9203,9209,9221,9227,9239,9241,9257,9277,9281,9283,9293,9311,9319,9323,9337,9341,9343,9349,9371,9377,9391,9397,9403,9413,9419,9421,9431,9433,9437,9439,9461,9463,9467,9473,9479,9491,9497,9511,9521,9533,9539,9547,9551,9587,9601,9613,9619,9623,9629,9631,9643,9649,9661,9677,9679,9689,9697,9719,9721,9733,9739,9743,9749,9767,9769,9781,9787,9791,9803,9811,9817,9829,9833,9839,9851,9857,9859,9871,9883,9887,9901,9907,9923,9929,9931,9941,9949,9967,9973];
+// var primes = {};
+
+// for (var i = 0; i < dozPrimes.length; i++) {
+//   primes[dozPrimes[i]] = 1;
+// }
+
+var primes = {"1009":1,"1013":1,"1019":1,"1021":1,"1031":1,"1033":1,"1039":1,"1049":1,"1051":1,"1061":1,"1063":1,"1069":1,"1087":1,"1091":1,"1093":1,"1097":1,"1103":1,"1109":1,"1117":1,"1123":1,"1129":1,"1151":1,"1153":1,"1163":1,"1171":1,"1181":1,"1187":1,"1193":1,"1201":1,"1213":1,"1217":1,"1223":1,"1229":1,"1231":1,"1237":1,"1249":1,"1259":1,"1277":1,"1279":1,"1283":1,"1289":1,"1291":1,"1297":1,"1301":1,"1303":1,"1307":1,"1319":1,"1321":1,"1327":1,"1361":1,"1367":1,"1373":1,"1381":1,"1399":1,"1409":1,"1423":1,"1427":1,"1429":1,"1433":1,"1439":1,"1447":1,"1451":1,"1453":1,"1459":1,"1471":1,"1481":1,"1483":1,"1487":1,"1489":1,"1493":1,"1499":1,"1511":1,"1523":1,"1531":1,"1543":1,"1549":1,"1553":1,"1559":1,"1567":1,"1571":1,"1579":1,"1583":1,"1597":1,"1601":1,"1607":1,"1609":1,"1613":1,"1619":1,"1621":1,"1627":1,"1637":1,"1657":1,"1663":1,"1667":1,"1669":1,"1693":1,"1697":1,"1699":1,"1709":1,"1721":1,"1723":1,"1733":1,"1741":1,"1747":1,"1753":1,"1759":1,"1777":1,"1783":1,"1787":1,"1789":1,"1801":1,"1811":1,"1823":1,"1831":1,"1847":1,"1861":1,"1867":1,"1871":1,"1873":1,"1877":1,"1879":1,"1889":1,"1901":1,"1907":1,"1913":1,"1931":1,"1933":1,"1949":1,"1951":1,"1973":1,"1979":1,"1987":1,"1993":1,"1997":1,"1999":1,"2003":1,"2011":1,"2017":1,"2027":1,"2029":1,"2039":1,"2053":1,"2063":1,"2069":1,"2081":1,"2083":1,"2087":1,"2089":1,"2099":1,"2111":1,"2113":1,"2129":1,"2131":1,"2137":1,"2141":1,"2143":1,"2153":1,"2161":1,"2179":1,"2203":1,"2207":1,"2213":1,"2221":1,"2237":1,"2239":1,"2243":1,"2251":1,"2267":1,"2269":1,"2273":1,"2281":1,"2287":1,"2293":1,"2297":1,"2309":1,"2311":1,"2333":1,"2339":1,"2341":1,"2347":1,"2351":1,"2357":1,"2371":1,"2377":1,"2381":1,"2383":1,"2389":1,"2393":1,"2399":1,"2411":1,"2417":1,"2423":1,"2437":1,"2441":1,"2447":1,"2459":1,"2467":1,"2473":1,"2477":1,"2503":1,"2521":1,"2531":1,"2539":1,"2543":1,"2549":1,"2551":1,"2557":1,"2579":1,"2591":1,"2593":1,"2609":1,"2617":1,"2621":1,"2633":1,"2647":1,"2657":1,"2659":1,"2663":1,"2671":1,"2677":1,"2683":1,"2687":1,"2689":1,"2693":1,"2699":1,"2707":1,"2711":1,"2713":1,"2719":1,"2729":1,"2731":1,"2741":1,"2749":1,"2753":1,"2767":1,"2777":1,"2789":1,"2791":1,"2797":1,"2801":1,"2803":1,"2819":1,"2833":1,"2837":1,"2843":1,"2851":1,"2857":1,"2861":1,"2879":1,"2887":1,"2897":1,"2903":1,"2909":1,"2917":1,"2927":1,"2939":1,"2953":1,"2957":1,"2963":1,"2969":1,"2971":1,"2999":1,"3001":1,"3011":1,"3019":1,"3023":1,"3037":1,"3041":1,"3049":1,"3061":1,"3067":1,"3079":1,"3083":1,"3089":1,"3109":1,"3119":1,"3121":1,"3137":1,"3163":1,"3167":1,"3169":1,"3181":1,"3187":1,"3191":1,"3203":1,"3209":1,"3217":1,"3221":1,"3229":1,"3251":1,"3253":1,"3257":1,"3259":1,"3271":1,"3299":1,"3301":1,"3307":1,"3313":1,"3319":1,"3323":1,"3329":1,"3331":1,"3343":1,"3347":1,"3359":1,"3361":1,"3371":1,"3373":1,"3389":1,"3391":1,"3407":1,"3413":1,"3433":1,"3449":1,"3457":1,"3461":1,"3463":1,"3467":1,"3469":1,"3491":1,"3499":1,"3511":1,"3517":1,"3527":1,"3529":1,"3533":1,"3539":1,"3541":1,"3547":1,"3557":1,"3559":1,"3571":1,"3581":1,"3583":1,"3593":1,"3607":1,"3613":1,"3617":1,"3623":1,"3631":1,"3637":1,"3643":1,"3659":1,"3671":1,"3673":1,"3677":1,"3691":1,"3697":1,"3701":1,"3709":1,"3719":1,"3727":1,"3733":1,"3739":1,"3761":1,"3767":1,"3769":1,"3779":1,"3793":1,"3797":1,"3803":1,"3821":1,"3823":1,"3833":1,"3847":1,"3851":1,"3853":1,"3863":1,"3877":1,"3881":1,"3889":1,"3907":1,"3911":1,"3917":1,"3919":1,"3923":1,"3929":1,"3931":1,"3943":1,"3947":1,"3967":1,"3989":1,"4001":1,"4003":1,"4007":1,"4013":1,"4019":1,"4021":1,"4027":1,"4049":1,"4051":1,"4057":1,"4073":1,"4079":1,"4091":1,"4093":1,"4099":1,"4111":1,"4127":1,"4129":1,"4133":1,"4139":1,"4153":1,"4157":1,"4159":1,"4177":1,"4201":1,"4211":1,"4217":1,"4219":1,"4229":1,"4231":1,"4241":1,"4243":1,"4253":1,"4259":1,"4261":1,"4271":1,"4273":1,"4283":1,"4289":1,"4297":1,"4327":1,"4337":1,"4339":1,"4349":1,"4357":1,"4363":1,"4373":1,"4391":1,"4397":1,"4409":1,"4421":1,"4423":1,"4441":1,"4447":1,"4451":1,"4457":1,"4463":1,"4481":1,"4483":1,"4493":1,"4507":1,"4513":1,"4517":1,"4519":1,"4523":1,"4547":1,"4549":1,"4561":1,"4567":1,"4583":1,"4591":1,"4597":1,"4603":1,"4621":1,"4637":1,"4639":1,"4643":1,"4649":1,"4651":1,"4657":1,"4663":1,"4673":1,"4679":1,"4691":1,"4703":1,"4721":1,"4723":1,"4729":1,"4733":1,"4751":1,"4759":1,"4783":1,"4787":1,"4789":1,"4793":1,"4799":1,"4801":1,"4813":1,"4817":1,"4831":1,"4861":1,"4871":1,"4877":1,"4889":1,"4903":1,"4909":1,"4919":1,"4931":1,"4933":1,"4937":1,"4943":1,"4951":1,"4957":1,"4967":1,"4969":1,"4973":1,"4987":1,"4993":1,"4999":1,"5003":1,"5009":1,"5011":1,"5021":1,"5023":1,"5039":1,"5051":1,"5059":1,"5077":1,"5081":1,"5087":1,"5099":1,"5101":1,"5107":1,"5113":1,"5119":1,"5147":1,"5153":1,"5167":1,"5171":1,"5179":1,"5189":1,"5197":1,"5209":1,"5227":1,"5231":1,"5233":1,"5237":1,"5261":1,"5273":1,"5279":1,"5281":1,"5297":1,"5303":1,"5309":1,"5323":1,"5333":1,"5347":1,"5351":1,"5381":1,"5387":1,"5393":1,"5399":1,"5407":1,"5413":1,"5417":1,"5419":1,"5431":1,"5437":1,"5441":1,"5443":1,"5449":1,"5471":1,"5477":1,"5479":1,"5483":1,"5501":1,"5503":1,"5507":1,"5519":1,"5521":1,"5527":1,"5531":1,"5557":1,"5563":1,"5569":1,"5573":1,"5581":1,"5591":1,"5623":1,"5639":1,"5641":1,"5647":1,"5651":1,"5653":1,"5657":1,"5659":1,"5669":1,"5683":1,"5689":1,"5693":1,"5701":1,"5711":1,"5717":1,"5737":1,"5741":1,"5743":1,"5749":1,"5779":1,"5783":1,"5791":1,"5801":1,"5807":1,"5813":1,"5821":1,"5827":1,"5839":1,"5843":1,"5849":1,"5851":1,"5857":1,"5861":1,"5867":1,"5869":1,"5879":1,"5881":1,"5897":1,"5903":1,"5923":1,"5927":1,"5939":1,"5953":1,"5981":1,"5987":1,"6007":1,"6011":1,"6029":1,"6037":1,"6043":1,"6047":1,"6053":1,"6067":1,"6073":1,"6079":1,"6089":1,"6091":1,"6101":1,"6113":1,"6121":1,"6131":1,"6133":1,"6143":1,"6151":1,"6163":1,"6173":1,"6197":1,"6199":1,"6203":1,"6211":1,"6217":1,"6221":1,"6229":1,"6247":1,"6257":1,"6263":1,"6269":1,"6271":1,"6277":1,"6287":1,"6299":1,"6301":1,"6311":1,"6317":1,"6323":1,"6329":1,"6337":1,"6343":1,"6353":1,"6359":1,"6361":1,"6367":1,"6373":1,"6379":1,"6389":1,"6397":1,"6421":1,"6427":1,"6449":1,"6451":1,"6469":1,"6473":1,"6481":1,"6491":1,"6521":1,"6529":1,"6547":1,"6551":1,"6553":1,"6563":1,"6569":1,"6571":1,"6577":1,"6581":1,"6599":1,"6607":1,"6619":1,"6637":1,"6653":1,"6659":1,"6661":1,"6673":1,"6679":1,"6689":1,"6691":1,"6701":1,"6703":1,"6709":1,"6719":1,"6733":1,"6737":1,"6761":1,"6763":1,"6779":1,"6781":1,"6791":1,"6793":1,"6803":1,"6823":1,"6827":1,"6829":1,"6833":1,"6841":1,"6857":1,"6863":1,"6869":1,"6871":1,"6883":1,"6899":1,"6907":1,"6911":1,"6917":1,"6947":1,"6949":1,"6959":1,"6961":1,"6967":1,"6971":1,"6977":1,"6983":1,"6991":1,"6997":1,"7001":1,"7013":1,"7019":1,"7027":1,"7039":1,"7043":1,"7057":1,"7069":1,"7079":1,"7103":1,"7109":1,"7121":1,"7127":1,"7129":1,"7151":1,"7159":1,"7177":1,"7187":1,"7193":1,"7207":1,"7211":1,"7213":1,"7219":1,"7229":1,"7237":1,"7243":1,"7247":1,"7253":1,"7283":1,"7297":1,"7307":1,"7309":1,"7321":1,"7331":1,"7333":1,"7349":1,"7351":1,"7369":1,"7393":1,"7411":1,"7417":1,"7433":1,"7451":1,"7457":1,"7459":1,"7477":1,"7481":1,"7487":1,"7489":1,"7499":1,"7507":1,"7517":1,"7523":1,"7529":1,"7537":1,"7541":1,"7547":1,"7549":1,"7559":1,"7561":1,"7573":1,"7577":1,"7583":1,"7589":1,"7591":1,"7603":1,"7607":1,"7621":1,"7639":1,"7643":1,"7649":1,"7669":1,"7673":1,"7681":1,"7687":1,"7691":1,"7699":1,"7703":1,"7717":1,"7723":1,"7727":1,"7741":1,"7753":1,"7757":1,"7759":1,"7789":1,"7793":1,"7817":1,"7823":1,"7829":1,"7841":1,"7853":1,"7867":1,"7873":1,"7877":1,"7879":1,"7883":1,"7901":1,"7907":1,"7919":1,"7927":1,"7933":1,"7937":1,"7949":1,"7951":1,"7963":1,"7993":1,"8009":1,"8011":1,"8017":1,"8039":1,"8053":1,"8059":1,"8069":1,"8081":1,"8087":1,"8089":1,"8093":1,"8101":1,"8111":1,"8117":1,"8123":1,"8147":1,"8161":1,"8167":1,"8171":1,"8179":1,"8191":1,"8209":1,"8219":1,"8221":1,"8231":1,"8233":1,"8237":1,"8243":1,"8263":1,"8269":1,"8273":1,"8287":1,"8291":1,"8293":1,"8297":1,"8311":1,"8317":1,"8329":1,"8353":1,"8363":1,"8369":1,"8377":1,"8387":1,"8389":1,"8419":1,"8423":1,"8429":1,"8431":1,"8443":1,"8447":1,"8461":1,"8467":1,"8501":1,"8513":1,"8521":1,"8527":1,"8537":1,"8539":1,"8543":1,"8563":1,"8573":1,"8581":1,"8597":1,"8599":1,"8609":1,"8623":1,"8627":1,"8629":1,"8641":1,"8647":1,"8663":1,"8669":1,"8677":1,"8681":1,"8689":1,"8693":1,"8699":1,"8707":1,"8713":1,"8719":1,"8731":1,"8737":1,"8741":1,"8747":1,"8753":1,"8761":1,"8779":1,"8783":1,"8803":1,"8807":1,"8819":1,"8821":1,"8831":1,"8837":1,"8839":1,"8849":1,"8861":1,"8863":1,"8867":1,"8887":1,"8893":1,"8923":1,"8929":1,"8933":1,"8941":1,"8951":1,"8963":1,"8969":1,"8971":1,"8999":1,"9001":1,"9007":1,"9011":1,"9013":1,"9029":1,"9041":1,"9043":1,"9049":1,"9059":1,"9067":1,"9091":1,"9103":1,"9109":1,"9127":1,"9133":1,"9137":1,"9151":1,"9157":1,"9161":1,"9173":1,"9181":1,"9187":1,"9199":1,"9203":1,"9209":1,"9221":1,"9227":1,"9239":1,"9241":1,"9257":1,"9277":1,"9281":1,"9283":1,"9293":1,"9311":1,"9319":1,"9323":1,"9337":1,"9341":1,"9343":1,"9349":1,"9371":1,"9377":1,"9391":1,"9397":1,"9403":1,"9413":1,"9419":1,"9421":1,"9431":1,"9433":1,"9437":1,"9439":1,"9461":1,"9463":1,"9467":1,"9473":1,"9479":1,"9491":1,"9497":1,"9511":1,"9521":1,"9533":1,"9539":1,"9547":1,"9551":1,"9587":1,"9601":1,"9613":1,"9619":1,"9623":1,"9629":1,"9631":1,"9643":1,"9649":1,"9661":1,"9677":1,"9679":1,"9689":1,"9697":1,"9719":1,"9721":1,"9733":1,"9739":1,"9743":1,"9749":1,"9767":1,"9769":1,"9781":1,"9787":1,"9791":1,"9803":1,"9811":1,"9817":1,"9829":1,"9833":1,"9839":1,"9851":1,"9857":1,"9859":1,"9871":1,"9883":1,"9887":1,"9901":1,"9907":1,"9923":1,"9929":1,"9931":1,"9941":1,"9949":1,"9967":1,"9973":1};
+
+function has2PermPrimes (num) {
+  var str = num.toString();
+  var perms = permute(str);
+  var count = 0;
+  var primePerms = [];
+
+  for (var i = 0; i < perms.length; i++) {
+    if (primes[perms[i]]) {
+      count++;
+      primePerms.push(perms[i]);
+    }
+  }
+
+  return count >= 3 ? primePerms : false;
+}
+
+function permute (str, cache) {
+  var a = str.split('');
+  var swap, rev;
+
+  if (!cache) {
+    str = a.sort(function(a,b) {
+      return a - b;
+    }).join('');
+    cache = [str];
+  }
+
+  for (var k = a.length-1; k >= 0; k--) {
+    if (a[k] < a[k+1]) {
+      for (var l = a.length-1; l > k; l--) {
+        if (a[k] < a[l]) {
+          swap = a[l];
+          a[l] = a[k];
+          a[k] = swap;
+          rev = a.slice(k+1).reverse().join('');
+          a.splice(k+1, a.length-1, rev);
+          cache.push(a.join(''));
+          return permute(a.join(''), cache)
+        }
+      }
+    }
+  }
+  return cache;
+}
+
+var primeTripsOrMore = [];
+
+for (var i = 0; i < dozPrimes.length; i++) {
+  var curr = has2PermPrimes(dozPrimes[i]);
+  if (curr) {
+    primeTripsOrMore.push(curr);
+  }
+}
+
+// function findMatchingInc(arr) {
+//   var obj = {};
+//   var diff;
+
+//   for (var i = 0; i < arr.length; i++) {
+//     obj[arr[i]] = 1;
+//   }
+
+//   for (var j = 0; j < arr.length; j++) {
+//     for (var k = 0; k < arr.length; k++) {
+//       if (j !== k) {
+//         diff = +arr[j] > +arr[k] ? +arr[j] - +arr[k] : +arr[k] - +arr[j];
+//         var next =
+//         if
+//       }
+//     }
+//   }
+// }
+
+
+function getDiffs(arr) {
+  var diff;
+  var diffs = [];
+  for (var j = 1; j < arr.length; j++) {
+    for (var k = 0; k < j; k++) {
+      diff = +arr[j] - +arr[k];
+      diffs.push(diff);
+    }
+  }
+  return diffs;
+}
+
+function arrHasDupe(arr) {
+  for (var j = 0; j < arr.length; j++) {
+    for (var k = 1; k < arr.length; k++) {
+      if (j !== k && arr[j] === arr[k]) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+var maybes = [];
+
+for (var l = 0; l < primeTripsOrMore.length; l++) {
+  diffs = getDiffs(primeTripsOrMore[l]);
+  if (arrHasDupe(diffs)) {
+    maybes.push(primeTripsOrMore[l]);
+  }
+}
+
+
+for (var m = 0; m < primeTripsOrMore.length; m++) {
+  if (equidistantTrips(primeTripsOrMore[m])) {
+    console.log(equidistantTrips(primeTripsOrMore[m]));
+  }
+}
+
+var sampleArr = [104, 150, 151, 172, 176, 200, 212, 247, 250, 268]; // 150, 200, 250 are equidistant
+// how to test for 3 equidistant values?
+
+//for each in arr
+// for each other in array that is greater
+// diff > 0. other + diff = something else in array? (each + 2(diff) = another in array?)
+
+function equidistantTrips(arr) {
+  var diff;
+  for (var i = 0; i < arr.length; i++) {
+    for (var j = i + 1; j < arr.length; j++) {
+      diff = +arr[j] - +arr[i];
+      if (arr.indexOf((+arr[i] + 2 * diff).toString()) !== -1) {
+        console.log('diff: ' + diff);
+        return [+arr[i], +arr[i] + diff, +arr[i] + 2 * diff];
+      }
+    }
+  }
+}
+
+///////////////////////////////
+// Consecutive prime sum
+// Problem 50
+// The prime 41, can be written as the sum of six consecutive primes:
+
+// 41 = 2 + 3 + 5 + 7 + 11 + 13
+// This is the longest sum of consecutive primes that adds to a prime below one-hundred.
+
+// The longest sum of consecutive primes below one-thousand that adds to a prime, contains 21 terms, and is equal to 953.
+
+// Which prime, below one-million, can be written as the sum of the most consecutive primes?
+
+// first 546 primes add to 997661
+
+var primes = getPrimesLessThan(1000000); // 78498 primes
+
+function sumPrimes(firstPrimeIndex, totalNeeded) {
+  var sum = 0;
+  var i = firstPrimeIndex || 0;
+  var count = 0;
+  var ret;
+
+  while (sum < totalNeeded) {
+    sum += primes[i];
+    i++;
+    count++;
+  }
+
+  count--;
+  sum -= primes[i-1];
+
+  if (sum === totalNeeded) {
+    ret = {};
+    ret[sum] = count;
+    return ret;
+  } else {
+    console.log("failed - " + sum + ", " + count + " primes");
+  }
+}
+
+function sumPrimesRange (minIndex, maxIndex) {
+  var sum = 0;
+  var str = '';
+
+  for (var i = minIndex; i <= maxIndex; i++) {
+    sum += primes[i];
+    str += primes[i] + " + ";
+  }
+  str = str.split('').slice(0, -3).join('');
+  str += " = " + sum;
+  console.log(str);
+  return sum;
+}
+
+
+function isPrime(num) {
+  // var count = 1;
+  var i = 2;
+  var currentMax = num;
+  while (i < currentMax) {
+
+    if (num % i === 0) {
+      // console.log(count);
+      return false;
+    } else {
+      currentMax = num / i;
+    }
+    i++;
+    // count++;
+  }
+  // console.log(count);
+  return true;
+}
+
+function getPrimesLessThan(num) {
+  var primes = [];
+  for (var i = 2; i < num; i++) {
+    if (isPrime(i)) {
+      primes.push(i);
+    }
+  }
+  return primes;
+}
+
+///////////////////////
+// Prime digit replacements
+// Problem 51
+// By replacing the 1st digit of the 2-digit number *3, it turns out that six of the nine possible values: 13, 23, 43, 53, 73, and 83, are all prime.
+
+// By replacing the 3rd and 4th digits of 56**3 with the same digit, this 5-digit number is the first example having seven primes among the
+// ten generated numbers, yielding the family: 56003, 56113, 56333, 56443, 56663, 56773, and 56993. Consequently 56003, being the first member
+// of this family, is the smallest prime with this property.
+
+// Find the smallest prime which, by replacing part of the number (not necessarily adjacent digits) with the same digit, is part of an eight prime
+// value family.
+
+// for (var i = 0; i < arr.length; i++) {
+//   console.log(isPrime(arr[i]));
+// }
+
+var primes = [2];
+
+function findIt() {
+  var i = 0;
+  while(true) {
+    if (checkNumFor8PrimeFam(primes[i])) {
+      console.log(primes[i]);
+      return checkNumFor8PrimeFam(primes[i]);
+    }
+    i++;
+    pushNextPrime();
+  }
+}
+
+function pushNextPrime() {
+  var currNum = primes[primes.length-1] + 1;
+
+  while (!isPrime(currNum)) {
+    currNum++;
+  }
+
+  primes.push(currNum);
+}
+
+function isPrime(num) {
+  // var count = 1;
+  var i = 2;
+  var currentMax = num;
+  while (i < currentMax) {
+
+    if (num % i === 0) {
+      // console.log(count);
+      return false;
+    } else {
+      currentMax = num / i;
+    }
+    i++;
+    // count++;
+  }
+  // console.log(count);
+  return true;
+}
+
+function checkNumFor8PrimeFam(num) {
+  var fams = getFamilies(num);
+  var count;
+
+  for (var i = 0; i < fams.length; i++) {
+    for (var pat in fams[i]) {
+      count = 0;
+      for (var j = 0; j < 10; j++) {
+        if ((+fams[i][pat][j]).toString().length === num.toString().length
+          && isPrime(+fams[i][pat][j])) {
+          count++;
+        }
+      }
+      if (count >= 8) {
+        return fams[i][pat];
+      }
+    }
+  }
+  return false;
+}
+
+function getFamilies(num) {
+  var fams = [];
+
+  for (var i = 1; i < num.toString().length; i++) {
+    fams.push(digitReplace(num, i));
+  }
+  return fams;
+}
+
+function digitReplace(num, count) { // num = 3923, count = 2
+  var str = num.toString();
+  var patterns = getPatterns(num, count);
+  var pat;
+  var final = {};
+  var currNumArr;
+  var digit;
+
+  for (var i = 0; i < patterns.length; i++) {
+    pat = patterns[i];
+    final[pat] = [];
+    for (var j = 0; j < 10; j++) {
+      digit = j.toString();
+      currNumArr = [];
+      for (var k = 0; k < pat.length; k++) {
+        if (pat[k] === "1") {
+          currNumArr.push(str[k]);
+        } else {
+          currNumArr.push(digit);
+        }
+        if (k === pat.length-1) {
+          final[pat].push(currNumArr.join(''));
+        }
+      }
+    }
+  }
+
+  return final;
+}
+
+// var final = {
+//   "1100" : {
+//     "0" : [
+//       "0023",
+//       "1123",
+//       "2223",
+//       "3323",
+//       "4423",
+//       "5523",
+//       "6623",
+//       "7723",
+//       "8823",
+//       "9923"
+//     ],
+//     "1" : [...],
+//     ...
+//   },
+//   "1010" : {...},
+//   ...
+// }
+
+function getPatterns(num, count) {
+  var str = num.toString();
+  var patternArr = Array(str.length);
+  var patternStr;
+
+  for (var j = 0; j < count; j++) {
+    patternArr.push("0");
+  }
+  for (var i = 0; i < str.length - count; i++) {
+    patternArr.push("1");
+  }
+
+  patternStr = patternArr.join('');
+
+  return permute(patternStr);
+
+}
+
+function permute (str, cache) {
+  var a = str.split('');
+  var swap, rev;
+
+  if (!cache) {
+    str = a.sort(function(a,b) {
+      return a - b;
+    }).join('');
+    cache = [str];
+  }
+
+  for (var k = a.length-1; k >= 0; k--) {
+    if (a[k] < a[k+1]) {
+      for (var l = a.length-1; l > k; l--) {
+        if (a[k] < a[l]) {
+          swap = a[l];
+          a[l] = a[k];
+          a[k] = swap;
+          rev = a.slice(k+1).reverse().join('');
+          a.splice(k+1, a.length-1, rev);
+          cache.push(a.join(''));
+          return permute(a.join(''), cache)
+        }
+      }
+    }
+  }
+  return cache;
+}
+
+/////////////////////////////
+// Poker hands
+// Problem 54
+// In the card game poker, a hand consists of five cards and are ranked, from lowest to highest, in the following way:
+
+// High Card: Highest value card.
+// One Pair: Two cards of the same value.
+// Two Pairs: Two different pairs.
+// Three of a Kind: Three cards of the same value.
+// Straight: All cards are consecutive values.
+// Flush: All cards of the same suit.
+// Full House: Three of a kind and a pair.
+// Four of a Kind: Four cards of the same value.
+// Straight Flush: All cards are consecutive values of same suit.
+// Royal Flush: Ten, Jack, Queen, King, Ace, in same suit.
+// The cards are valued in the order:
+// 2, 3, 4, 5, 6, 7, 8, 9, 10, Jack, Queen, King, Ace.
+
+// If two players have the same ranked hands then the rank made up of the highest value wins; for example, a pair of eights beats a pair of fives (see example 1 below). But if two ranks tie, for example, both players have a pair of queens, then highest cards in each hand are compared (see example 4 below); if the highest cards tie then the next highest cards are compared, and so on.
+
+// Consider the following five hands dealt to two players:
+
+// Hand    Player 1    Player 2    Winner
+// 1   5H 5C 6S 7S KD
+// Pair of Fives
+//   2C 3S 8S 8D TD
+// Pair of Eights
+//   Player 2
+// 2   5D 8C 9S JS AC
+// Highest card Ace
+//   2C 5C 7D 8S QH
+// Highest card Queen
+//   Player 1
+// 3   2D 9C AS AH AC
+// Three Aces
+//   3D 6D 7D TD QD
+// Flush with Diamonds
+//   Player 2
+// 4   4D 6S 9H QH QC
+// Pair of Queens
+// Highest card Nine
+//   3D 6D 7H QD QS
+// Pair of Queens
+// Highest card Seven
+//   Player 1
+// 5   2H 2D 4C 4D 4S
+// Full House
+// With Three Fours
+//   3C 3D 3S 9S 9D
+// Full House
+// with Three Threes
+//   Player 1
+// The file, poker.txt, contains one-thousand random hands dealt to two players. Each line of the file contains ten cards (separated by a single space): the first five are Player 1's cards and the last five are Player 2's cards. You can assume that all hands are valid (no invalid characters or repeated cards), each player's hand is in no specific order, and in each hand there is a clear winner.
+
+// How many hands does Player 1 win?
+
+
+function whoWins(handStr1, handStr2) {
+  var hand1Best = getBestHand(handStr1);
+  var hand2Best = getBestHand(handStr2);
+
+  if (hand1Best.rank === hand2Best.rank) {
+    return runOff(hand1Best, hand2Best);
+  } else if (hand1Best.rank > hand2Best.rank) {
+    return "Player 1";
+  } else {
+    return "Player 2";
+  }
+}
+
+function runOff(hand1Best, hand2Best) {
+  var type = hand1Best.type;
+
+  switch (type) {
+    case "royalFlush":
+      return "Tie";
+    case "straightFlush":
+      if (firstCardIsHigher(hand1Best.val[0], hand2Best.val[0])) {
+        return "Player 1";
+      } else if (firstCardIsHigher(hand2Best.val[0], hand1Best.val[0])) {
+        return "Player 2";
+      } else {
+        return "Tie";
+      }
+
+    case "fullHouse":
+      if (firstCardIsHigher(hand1Best.val[0], hand2Best.val[0])) {
+        return "Player 1";
+      } else if (firstCardIsHigher(hand2Best.val[0], hand1Best.val[0])) {
+        return "Player 2";
+      } else if (firstCardIsHigher(hand1Best.val[1], hand2Best.val[1])) {
+        return "Player 1";
+      } else if (firstCardIsHigher(hand2Best.val[1], hand1Best.val[1])) {
+        return "Player 2";
+      } else {
+        return firstCardIsHigher(hand1Best.val[2], hand2Best.val[2]) ? "Player 1" : "Player 2";
+      }
+    case "flush":
+      return firstSuitIsHigher(hand1Best.val, hand2Best.val) ? "Player 1" : "Player 2";
+    case "straight":
+      return firstCardIsHigher(hand1Best.val, hand2Best.val) ? "Player 1" : "Player 2";
+    case "trips":
+      return firstCardIsHigher(hand1Best.val, hand2Best.val) ? "Player 1" : "Player 2";
+    case "twoPair":
+      if (firstCardIsHigher(hand1Best.val[0], hand2Best.val[0])) {
+        return "Player 1";
+      } else if (firstCardIsHigher(hand2Best.val[0], hand1Best.val[0])) {
+        return "Player 2";
+      } else {
+        return firstCardIsHigher(hand1Best.val[1], hand2Best.val[1]) ? "Player 1" : "Player 2";
+      }
+    case "quads":
+    case "onePair":
+    case "highCard":
+      return firstCardIsHigher(hand1Best.val, hand2Best.val) ? "Player 1" : "Player 2";
+  }
+}
+
+function getBestHand(handStr) {
+  var hand = makeHandArr(handStr);
+
+  if (check.royalFlush(hand)) {
+    return {type: "royalFlush", rank: 10, val: check.royalFlush(hand)};
+  } else if (check.straightFlush(hand)) {
+    return {type: "straightFlush", rank: 9, val: check.straightFlush(hand)};
+  } else if (check.quads(hand)) {
+    return {type: "quads", rank: 8, val: check.quads(hand)};
+  } else if (check.fullHouse(hand)) {
+    return {type: "fullHouse", rank: 7, val: check.fullHouse(hand)};
+  } else if (check.flush(hand)) {
+    return {type: "flush", rank: 6, val: check.flush(hand)};
+  } else if (check.straight(hand)) {
+    return {type: "straight", rank: 5, val: check.straight(hand)};
+  } else if (check.trips(hand)) {
+    return {type: "trips", rank: 4, val: check.trips(hand)};
+  } else if (check.twoPair(hand)) {
+    return {type: "twoPair", rank: 3, val: check.twoPair(hand)};
+  } else if (check.onePair(hand)) {
+    return {type: "onePair", rank: 2, val: check.onePair(hand)};
+  } else {
+    return {type: "highCard", rank: 1, val: check.highCard(hand)};
+  }
+}
+
+function makeHandArr(handStr) {
+  var handArr = handStr.split(" ");
+  var hand = [];
+  var cardObj;
+
+  for (var i = 0; i < 5; i++) {
+    cardObj = {};
+    cardObj.value = handArr[i][0];
+    cardObj.suit = handArr[i][1];
+    hand.push(cardObj);
+  }
+  return hand;
+}
+
+var check = {
+
+  highCard: function (hand) {
+    var bestCard = hand[0];
+    for (var i = 1; i < 5; i++) {
+      if (higherCard(bestCard, hand[i])) {
+        bestCard = higherCard(bestCard, hand[i])
+      }
+    }
+    return bestCard.value;
+  },
+
+  onePair: function (hand) {
+    var matches = [];
+    for (var i = 0; i < 5; i++) {
+      for (var j = i+1; j < 5 ; j++) {
+        if (hand[i].value === hand[j].value) {
+          matches.push(hand[i].value);
+        }
+      }
+    }
+
+    if (matches.length === 1) { // returns false if better hand exists
+      return matches[0];
+    }
+
+    return false;
+  },
+
+  twoPair: function (hand) {
+    var matches = [];
+    for (var i = 0; i < 5; i++) {
+      for (var j = i+1; j < 5 ; j++) {
+        if (hand[i].value === hand[j].value) {
+          matches.push(hand[i].value);
+        }
+      }
+    }
+
+    if (matches.length === 2) { // returns false if better hand exists
+      return [matches[0], matches[1]];
+    }
+
+    return false;
+  },
+
+  trips: function (hand) {
+    var matches = [];
+    for (var i = 0; i < 5; i++) {
+      for (var j = i+1; j < 5 ; j++) {
+        if (hand[i].value === hand[j].value) {
+          matches.push(hand[i].value);
+        }
+      }
+    }
+
+    if (matches.length === 3) { // returns false if better hand exists
+      return matches[0];
+    }
+
+    return false;
+  },
+
+  straight: function (hand) {
+    var values = [];
+    var neededCards = [];
+    var neededCards2 = [];
+
+    for (var card in hand) {
+      values.push(hand[card].value);
+    }
+
+    var highCard = check.highCard(hand);
+    if (highCard === 'A') {
+      neededCards.push('K', 'Q', 'J', 'T');
+      neededCards2.push('2', '3', '4', '5');
+    } else if (highCard === 'K') {
+      neededCards.push('Q', 'J', 'T', '9')
+    } else if (highCard === 'Q') {
+      neededCards.push('J', 'T', '9', '8')
+    } else if (highCard === 'J') {
+      neededCards.push('T', '9', '8', '7')
+    } else {
+      neededCards.push((+highCard - 1).toString(), (+highCard - 2).toString(), (+highCard - 3).toString(), (+highCard - 4).toString())
+    }
+
+    console.log(neededCards, neededCards2);
+    console.log(values);
+
+    for (var i = 0; i < 4; i++) {
+      if (values.indexOf(neededCards[i]) === -1) {
+        if (highCard === 'A') {
+          if (values.indexOf(neededCards2[i]) === -1) {
+            return false;
+          } else {
+            neededCards = neededCards2;
+            continue;
+          }
+        }
+        return false;
+      }
+    }
+    return check.highCard(hand);
+  },
+
+  flush: function (hand) {
+    var suits = [];
+    for (var i = 0; i < 5; i++) {
+      suits.push(hand[i].suit);
+    }
+    if (suits[0] === suits[1]
+      && suits[0] === suits[2]
+      && suits[0] === suits[3]
+      && suits[0] === suits[4]) {
+      return check.highCard(hand);
+    }
+
+    return false;
+  },
+
+  fullHouse: function (hand) {
+    var matches = [];
+    var trip, pair, kicker;
+
+    for (var i = 0; i < 5; i++) {
+      for (var j = i+1; j < 5 ; j++) {
+        if (hand[i].value === hand[j].value) {
+          matches.push(hand[i].value);
+        }
+      }
+    }
+
+    if (matches.length === 4) { // returns false if better hand exists
+      if (matches[0] === matches[1]) {
+        trip = matches[0];
+        if (matches[2] === trip) {
+          pair = matches[3]
+        } else {
+          pair = matches[2]
+        }
+      } else {
+        trip = matches[1];
+        pair = matches[0];
+      }
+      return [trip, pair, kicker];
+    }
+
+    return false;
+  },
+
+  quads: function (hand) {
+    var counts = {};
+    for (var i = 0; i < 5; i++) {
+      if (counts[hand[i].value]) {
+        counts[hand[i].value]++;
+      } else {
+        counts[hand[i].value] = 1;
+      }
+    }
+    for (var val in counts) {
+      if (counts[val] === 4) {
+        return val;
+      }
+    }
+    return false;
+  },
+
+  straightFlush: function (hand) {
+    var straight;
+    var ret;
+    if (check.flush(hand) && check.straight(hand)) {
+      straight = check.straight(hand);
+      ret = [straight, check.flush(hand)];
+      return ret;
+    }
+    return false;
+  },
+
+  royalFlush: function (hand) {
+    if (check.straightFlush(hand) && check.highCard(hand) === 'A') {
+      return check.straightFlush(hand)[1];
+    }
+    return false;
+  }
+}
+
+function higherCard(card1, card2) {
+  var vals = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
+  var card1Rank = vals.indexOf(card1.value);
+  var card2Rank = vals.indexOf(card2.value);
+
+  if (card1Rank > card2Rank) {
+    return card1;
+  } else if (card1Rank < card2Rank) {
+    return card2;
+  } else {
+    return false;
+  }
+}
+
+function firstCardIsHigher(cardVal1, cardVal2) {
+  var vals = ['2','3','4','5','6','7','8','9','T','J','Q','K','A'];
+  var card1Rank = vals.indexOf(cardVal1);
+  var card2Rank = vals.indexOf(cardVal2);
+
+  if (card1Rank > card2Rank) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+function firstSuitIsHigher(suit1, suit2) {
+  var suits = ['C','D','H','S'];
+  var suit1Rank = suits.indexOf(suit1);
+  var suit2Rank = suits.indexOf(suit2);
+
+  if (suit1Rank > suit2Rank) {
+    return true;
+  } else {
+    return false;
+  }
+}
