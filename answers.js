@@ -4261,12 +4261,6 @@ const factorial = (n) => {
   return multiplyArray(factors);
 }
 
-const multiplyArray = (numStrArr) => {
-  return numStrArr.reduce((p,c) => {
-    return mul(p,c);
-  });
-}
-
 // add, sub, mul, div, pwr, exp, log, lgn(ln obv better), sqt,
 // const mul = (m1, m2) => {
 //   try {
@@ -4276,73 +4270,88 @@ const multiplyArray = (numStrArr) => {
 //     if (error) console.log(error);
 //   }
 // }
-const Mathy = class thisClass extends Math {
-  constructor() {
-    super();
-    thisClass.time = Date.now();
-  }
-  multiply(p, q) {
+
+class Stringy extends String {
+  rev() { return [...this].reverse().join(''); }
+}
+
+class Mathy extends Math {
+  static multiplyArray(nums) { return nums.reduce(multiply); }
+
+  static multiply(p, q) {
     if (Number.isSafeInteger(p * q)) return p * q;
 
-    const revNumStr = (n) => new Stringy(n).rev();
-
     let numsToSum = [],
-      pr = p.reverse(),
-      qr = q.reverse();
-
-    // pr[0] * qr[0]
-    // pr[0] * (qr[1] * 10)
-    // pr[0] * (qr[2] * 100)
-    // ...
-    // (pr[1] * 10) * qr[0]
+      pr = new Stringy(p).rev(),
+      qr = new Stringy(q).rev();
 
     for (let i = 0; i < pr.length; i++) {
       for (let j = 0; j < qr.length; j++) {
         numsToSum.push(
-          thisClass.multiply(
-            thisClass.multiply(pr[i],
-                               Math.pow(10, i)),
-
-            thisClass.multiply(qr[j],
-                               Math.pow(10, j))
+          Mathy.multiply(
+            Mathy.multiply(
+              pr[i],
+              Math.pow(10, i)),
+            Mathy.multiply(
+              qr[j],
+              Math.pow(10, j))
           )
         )
       }
     }
-    return thisClass.sumArray(numsToSum);
+    return Mathy.sumArray(numsToSum);
   }
-  sumArray(nums) {
-    return nums.reduce((p, c) => {
-      return thisClass.sum(p, c);
+  static sumArray(nums) { return nums.reduce(Mathy.sum); }
+
+  static addZeroes(v, w) {
+    while (v.toString().length < w.toString().length) {
+      b = '0' + b;//TODO
     }
   }
-  sum(b, d) {
+
+  static sum(b, d) {
     if (Number.isSafeInteger(+b + d)) return +b + d;  // +"1" + "53" === 54;  "1" + "53" === "153";
-    const br = b.toString().split('').reverse().join(''),
-          dr = d.toString().split('').reverse().join('');
-    //  3489
-    // + 236
-    //------
+
+    const br = [...b.toString()].reverse().join(''),
+          dr = [...d.toString()].reverse().join('');
+
+    let numsToSum = [];
 
     for (let i = 0; i < br.length; i++) {
-      for (let j = 0; j < dr.length; j++) {
+      // for (let j = 0, carryThe = 0, tallyThe; j < dr.length; j++) {
+         // if (+b < +d) {
+
+        }
+        let digitSum = +br[i] + dr[j];
+
+        tallyThe = digitSum % 10 + carryThe;
+        numsToSum.push(tallyThe);
+
+        carryThe = Mathy.floor(digitSum / 10);
+
+
+
+    let lengthDiff = Math.abs(b.length - d.length);
+
+
+  for (var j = 0; j < lengthDiff; j++) {
+    if (numArr1.length > numArr2.length) {
+      numArr2.unshift("0");
+    } else {
+      numArr1.unshift("0");
+    }
+  }
+
+
+
+
+
         (br[0] + dr[0]) % 10;
         (br[0] + dr[0]) / 10 - (br[0] + dr[0]) % 10
       }
     }
   }
 }
-
-class Stringy extends String {
-  static get [Symbol.species]() { return String; }
-  rev() {
-    return [...this].reverse().join('');
-  }
-}
-
-const mul = (m1, m2) => Number.isSafeInteger(m1 * m2) ? m1 * m2 : BigMath.multiply(m1, m2);
-
-// const willThisBeOver1M = () =>
 
 
 const multiply = (numStr1, num2) => {
@@ -4369,8 +4378,8 @@ const multiply = (numStr1, num2) => {
 
 const add = (numStr1, numStr2) => {
   console.log(`add(${numStr1}, ${numStr2})`);
-  var numArr1 = numStr1.split('');
-  var numArr2 = numStr2.split('');
+  var numArr1 = [...numStr1];
+  var numArr2 = [...numStr2];
   var lengthDiff = Math.abs(numStr1.length - numStr2.length);
   // console.log('lengthDiff: ', lengthDiff);
   var sumArr = [];
