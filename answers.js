@@ -3882,6 +3882,16 @@ function runOff(hand1Best, hand2Best) {
     case "royalFlush":
       return "Tie";
     case "straightFlush":
+    case "flush":
+      for (var i = 0; i < 5; i++) {
+        if (firstCardIsHigher(hand1Best.val[i], hand2Best.val[i])) {
+          return "Player 1";
+        } else if (firstCardIsHigher(hand2Best.val[i], hand1Best.val[i])) {
+          return "Player 2";
+        }
+      }
+      return "Tie";
+    case "straight":
       if (firstCardIsHigher(hand1Best.val[0], hand2Best.val[0])) {
         return "Player 1";
       } else if (firstCardIsHigher(hand2Best.val[0], hand1Best.val[0])) {
@@ -3889,25 +3899,6 @@ function runOff(hand1Best, hand2Best) {
       } else {
         return "Tie";
       }
-
-    case "fullHouse":
-      if (firstCardIsHigher(hand1Best.val[0], hand2Best.val[0])) {
-        return "Player 1";
-      } else if (firstCardIsHigher(hand2Best.val[0], hand1Best.val[0])) {
-        return "Player 2";
-      } else if (firstCardIsHigher(hand1Best.val[1], hand2Best.val[1])) {
-        return "Player 1";
-      } else if (firstCardIsHigher(hand2Best.val[1], hand1Best.val[1])) {
-        return "Player 2";
-      } else {
-        return firstCardIsHigher(hand1Best.val[2], hand2Best.val[2]) ? "Player 1" : "Player 2";
-      }
-    case "flush":
-      return firstSuitIsHigher(hand1Best.val, hand2Best.val) ? "Player 1" : "Player 2";
-    case "straight":
-      return firstCardIsHigher(hand1Best.val, hand2Best.val) ? "Player 1" : "Player 2";
-    case "trips":
-      return firstCardIsHigher(hand1Best.val, hand2Best.val) ? "Player 1" : "Player 2";
     case "twoPair":
       if (firstCardIsHigher(hand1Best.val[0], hand2Best.val[0])) {
         return "Player 1";
@@ -3916,10 +3907,12 @@ function runOff(hand1Best, hand2Best) {
       } else {
         return firstCardIsHigher(hand1Best.val[1], hand2Best.val[1]) ? "Player 1" : "Player 2";
       }
+    case "trips":
     case "quads":
+    case "fullHouse":
     case "onePair":
     case "highCard":
-      return firstCardIsHigher(hand1Best.val, hand2Best.val) ? "Player 1" : "Player 2";
+      return firstCardIsHigher(hand1Best.val[0], hand2Best.val[0]) ? "Player 1" : "Player 2";
   }
 }
 
@@ -3949,6 +3942,7 @@ function getBestHand(handStr) {
   }
 }
 
+
 function makeHandArr(handStr) {
   var handArr = handStr.split(" ");
   var hand = [];
@@ -3963,6 +3957,7 @@ function makeHandArr(handStr) {
   return hand;
 }
 
+//TODO: make these return similar objects
 var check = {
 
   highCard: function (hand) {
@@ -4019,7 +4014,7 @@ var check = {
       }
     }
 
-    if (matches.length === 3) { // returns false if better hand exists
+    if (matches.length === 3) { // returns false if quads or full house exists
       return matches[0];
     }
 
@@ -4185,4 +4180,222 @@ function firstSuitIsHigher(suit1, suit2) {
   } else {
     return false;
   }
+}
+
+
+
+//////////////////////////
+
+// Permuted multiples
+// Problem 52
+// It can be seen that the number, 125874, and its double, 251748, contain exactly the same digits, but in a different order.
+
+// Find the smallest positive integer, x, such that 2x, 3x, 4x, 5x, and 6x, contain the same digits.
+
+
+
+
+const all = (pred, as) => Array.from(as).every(pred);
+
+// polyfill
+// const all = (as, pred) =>
+//     for (let a of as) if (!pred(a)) return false;
+//     return true;
+// }
+
+const eqlSets = (as, bs) => {
+  if (as.size !== bs.size) return false;
+  for (let a of as) if (!bs.has(a)) return false;
+  return true;
+}
+
+//------
+
+const sortDigits = (num) => num.toString().split('').sort().join('');
+
+const areAnagrams = (nums) => {
+  for (let i = 1; i < nums.length; i++) {
+    if (sortDigits(nums[i]) !== sortDigits(nums[i-1])) return false;
+  }
+  return true;
+}
+
+const multiples = (baseNum) => {
+  let arr = Array(7);
+  for (let i = 1; i <= 7; i++) {
+    arr[i-1] = baseNum * i;  // I'm betting this assignment is faster than using .push()
+  }
+  return arr;
+}
+
+let findTehAnswer = (num = 74000000, timeoutInMin = 0.25) => {
+  const numInitial = num;
+  const start = Date.now();
+  while (num % 1000000 !== 0 || Date.now() - start < timeoutInMin * 60 * 1000) {
+    if (areAnagrams(multiples(num))) return num;
+    num++;
+  }
+  console.log(`Timed out after ${timeoutInMin} minutes. Started at ${iInitial} and made it to ${num}, for a rate of ${(timeoutInMin*60*1000)/(num - numInitial)}ms per loop`);
+}
+
+//------
+
+
+// Combinatoric selections
+// Problem 53
+
+// How many, not necessarily distinct, values of  nCr, for 1 ≤ n ≤ 100, are greater than one-million?
+// let [n, r, c] = [1, 1, undefined];
+for (let n = 1, c; n <= 100; n++) {
+  for (let r = 1; r <= n; r++) {
+    c = numOfWaysToChoose(n,r);
+  }
+}
+
+const numOfWaysToChoose = (n, r) => fac(n)/(fac(r) * fac(n-r));
+
+const factorial = (n) => {
+  let factors = Array(n);
+  for (let i = n; i > 0; i--) factors[i-1] = i.toString();
+
+  return multiplyArray(factors);
+}
+
+const multiplyArray = (numStrArr) => {
+  return numStrArr.reduce((p,c) => {
+    return mul(p,c);
+  });
+}
+
+// add, sub, mul, div, pwr, exp, log, lgn(ln obv better), sqt,
+// const mul = (m1, m2) => {
+//   try {
+//     return m1 * m2;
+//   }
+//   catch (error) {
+//     if (error) console.log(error);
+//   }
+// }
+const Mathy = class thisClass extends Math {
+  constructor() {
+    super();
+    thisClass.time = Date.now();
+  }
+  multiply(p, q) {
+    if (Number.isSafeInteger(p * q)) return p * q;
+
+    const revNumStr = (n) => new Stringy(n).rev();
+
+    let numsToSum = [],
+      pr = p.reverse(),
+      qr = q.reverse();
+
+    // pr[0] * qr[0]
+    // pr[0] * (qr[1] * 10)
+    // pr[0] * (qr[2] * 100)
+    // ...
+    // (pr[1] * 10) * qr[0]
+
+    for (let i = 0; i < pr.length; i++) {
+      for (let j = 0; j < qr.length; j++) {
+        numsToSum.push(
+          thisClass.multiply(
+            thisClass.multiply(pr[i],
+                               Math.pow(10, i)),
+
+            thisClass.multiply(qr[j],
+                               Math.pow(10, j))
+          )
+        )
+      }
+    }
+    return thisClass.sumArray(numsToSum);
+  }
+  sumArray(nums) {
+    return nums.reduce((p, c) => {
+      return thisClass.sum(p, c);
+    }
+  }
+  sum(b, d) {
+    if (Number.isSafeInteger(+b + d)) return +b + d;  // +"1" + "53" === 54;  "1" + "53" === "153";
+    const br = b.toString().split('').reverse().join(''),
+          dr = d.toString().split('').reverse().join('');
+    //  3489
+    // + 236
+    //------
+
+    for (let i = 0; i < br.length; i++) {
+      for (let j = 0; j < dr.length; j++) {
+        (br[0] + dr[0]) % 10;
+        (br[0] + dr[0]) / 10 - (br[0] + dr[0]) % 10
+      }
+    }
+  }
+}
+
+class Stringy extends String {
+  static get [Symbol.species]() { return String; }
+  rev() {
+    return [...this].reverse().join('');
+  }
+}
+
+const mul = (m1, m2) => Number.isSafeInteger(m1 * m2) ? m1 * m2 : BigMath.multiply(m1, m2);
+
+// const willThisBeOver1M = () =>
+
+
+const multiply = (numStr1, num2) => {
+  console.log(`multiply(${numStr1}, ${num2})`);
+  let numsToSum = [];
+  for (let i = numStr1.length-1, digit, num, numArr; i >= 0; i--) { // from the smallest digit to the highest on num1
+    digit = Number(numStr1[i]);
+    num = (digit * num2).toString();
+    numArr = num.split('');
+    // TODO
+    for (let j = 0; j < numStr1.length-1-i; j++) {
+      numArr.push('0');
+    }
+    num = numArr.join('');
+    numsToSum.push(num);
+  }
+  console.log(numsToSum);
+  return numsToSum.reduce(function(prev, curr) {
+    if (needBe) return add(prev, curr);
+    // return Number.isSafeInteger
+  }, '0');
+
+}
+
+const add = (numStr1, numStr2) => {
+  console.log(`add(${numStr1}, ${numStr2})`);
+  var numArr1 = numStr1.split('');
+  var numArr2 = numStr2.split('');
+  var lengthDiff = Math.abs(numStr1.length - numStr2.length);
+  // console.log('lengthDiff: ', lengthDiff);
+  var sumArr = [];
+  var summedNumStr;
+  var carry = 0;
+
+
+  for (var j = 0; j < lengthDiff; j++) {
+    if (numArr1.length > numArr2.length) {
+      numArr2.unshift("0");
+    } else {
+      numArr1.unshift("0");
+    }
+  }
+
+  for (var i = numArr1.length-1; i >= 0; i--) {
+    summedNumStr = (+numArr1[i] + +numArr2[i] + carry).toString();
+    if (summedNumStr.length > 1 && i !== 0) {
+      sumArr.unshift(summedNumStr[1]);
+      carry = +summedNumStr[0];
+    } else {
+      sumArr.unshift(summedNumStr);
+      carry = 0;
+    }
+  }
+  // console.log(sumArr);
+  return sumArr.join('');
 }
